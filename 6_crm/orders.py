@@ -25,7 +25,7 @@ def create_order(orders: list[Order], order: Order) -> None:
 
 def list_orders(orders: list[Order]) -> list[Order] | None:
     """ Вернуть список заказов """
-    pass
+    return orders
 
 
 def edit_order(
