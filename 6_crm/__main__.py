@@ -1,5 +1,6 @@
 """ Модуль точки входа приложения crm системы """
 
+import storage
 from orders import Order, create_order, edit_order, list_orders, remove_order
 
 if __name__ == "__main__":
@@ -38,3 +39,7 @@ if __name__ == "__main__":
     removed = remove_order(orders, 2)
     print("Удалён:", removed)
     print("После remove_order:", list_orders(orders))
+
+    storage.save(orders, "orders.json")
+    loaded = storage.load("orders.json")
+    print("После save/load:", loaded)

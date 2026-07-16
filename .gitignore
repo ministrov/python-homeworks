@@ -1,6 +1,7 @@
-echo "__pycache__/
+__pycache__/
 *.pyc
 .venv/
 venv/
 .idea/
-.vscode/" > .gitignore
+.vscode/
+6_crm/*.json
