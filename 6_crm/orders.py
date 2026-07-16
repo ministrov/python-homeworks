@@ -20,21 +20,30 @@ class Order(TypedDict):
 
 def create_order(orders: list[Order], order: Order) -> None:
     """ Добавить новый заказ в список заказов """
-    pass
+    orders.append(order)
 
 
 def list_orders(orders: list[Order]) -> list[Order] | None:
     """ Вернуть список заказов """
-    pass
+    return orders
 
 
 def edit_order(
     orders: list[Order], order_id: int, updates: dict[str, object]
 ) -> Order | None:
     """ Изменить поля заказа по id """
-    pass
+    for order in orders:
+        if order["id"] == order_id:
+            for key, value in updates.items():
+                order[key] = value
+            return order
+    return None
 
 
 def remove_order(orders: list[Order], order_id: int) -> Order | None:
     """ Удалить заказ по id """
-    pass
+    for order in orders:
+        if order["id"] == order_id:
+            orders.remove(order)
+            return order
+    return None
