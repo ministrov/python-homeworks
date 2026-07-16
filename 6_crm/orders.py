@@ -20,7 +20,7 @@ class Order(TypedDict):
 
 def create_order(orders: list[Order], order: Order) -> None:
     """ Добавить новый заказ в список заказов """
-    pass
+    orders.append(order)
 
 
 def list_orders(orders: list[Order]) -> list[Order] | None:
