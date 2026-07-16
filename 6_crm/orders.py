@@ -42,4 +42,8 @@ def edit_order(
 
 def remove_order(orders: list[Order], order_id: int) -> Order | None:
     """ Удалить заказ по id """
-    pass
+    for order in orders:
+        if order["id"] == order_id:
+            orders.remove(order)
+            return order
+    return None
