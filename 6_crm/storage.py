@@ -12,7 +12,6 @@ def load(path: str) -> list[Order]:
     with open(path, "r", encoding="utf-8") as f:
         try:
             raw = json.load(f)
-            print(raw)
         except json.JSONDecodeError as e:
             print(f"Файл поврежден {e}")
             return []
