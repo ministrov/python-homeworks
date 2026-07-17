@@ -23,8 +23,11 @@ def load(path: str) -> list[Order]:
 
 def save(orders: list[Order], path: str) -> None:
     """ Сохранить список заказов в JSON файл """
-    serializable: list[dict[str, object]] = [
-        {**order, "tags": list(order["tags"])} for order in orders
-    ]
+    serializable: list[dict[str, object]] = []
+    for order in orders:
+        order_copy = dict(order)
+        order_copy["tags"] = list(order["tags"])
+        serializable.append(order_copy)
+
     with open(path, "w", encoding="utf-8") as f:
         json.dump(serializable, f, ensure_ascii=False, indent=2)
