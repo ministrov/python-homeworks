@@ -1,56 +1,176 @@
 """ Модуль парсинга аргументов / команд """
 
-import argparse
 
-from orders import OrderStatus
+def parse_list(args: list[str]) -> dict[str, object]:
+    """ Разобрать аргументы команды list """
+    overdue = False
+    tag = None
+    limit = None
 
-_STATUSES: tuple[OrderStatus, ...] = ("new", "in_progress", "done", "cancelled")
+    i = 0
+    while i < len(args):
+        arg = args[i]
+        if arg == "--overdue":
+            overdue = True
+            i += 1
+        elif arg == "--tag":
+            tag = args[i + 1]
+            i += 2
+        elif arg == "--limit":
+            limit = int(args[i + 1])
+            i += 2
+        else:
+            raise ValueError(f"Неизвестный аргумент: {arg}")
+
+    return {"overdue": overdue, "tag": tag, "limit": limit}
 
 
-def build_parser() -> argparse.ArgumentParser:
-    """ Собрать парсер аргументов командной строки crm-утилиты """
-    parser = argparse.ArgumentParser(
-        prog="crm", description="CRM утилита для управления заказами"
-    )
-    subparsers = parser.add_subparsers(dest="command", required=True)
+def parse_add(args: list[str]) -> dict[str, object]:
+    """ Разобрать аргументы команды add """
+    title = None
+    amount = None
+    email = None
+    due = None
+    tags = None
 
-    list_parser = subparsers.add_parser("list", help="Вывести таблицу заказов")
-    list_parser.add_argument(
-        "--overdue", action="store_true", help="Только просроченные заказы"
-    )
-    list_parser.add_argument("--tag", help="Фильтр по тегу")
-    list_parser.add_argument(
-        "--limit", type=int, help="Ограничить количество выводимых заказов"
-    )
+    i = 0
+    while i < len(args):
+        arg = args[i]
+        if arg == "--title":
+            title = args[i + 1]
+            i += 2
+        elif arg == "--amount":
+            amount = float(args[i + 1])
+            i += 2
+        elif arg == "--email":
+            email = args[i + 1]
+            i += 2
+        elif arg == "--due":
+            due = args[i + 1]
+            i += 2
+        elif arg == "--tags":
+            tags = args[i + 1]
+            i += 2
+        else:
+            raise ValueError(f"Неизвестный аргумент: {arg}")
 
-    add_parser = subparsers.add_parser("add", help="Добавить новый заказ")
-    add_parser.add_argument("--title", required=True, help="Название заказа")
-    add_parser.add_argument(
-        "--amount", required=True, type=float, help="Сумма заказа"
-    )
-    add_parser.add_argument("--email", required=True, help="Email клиента")
-    add_parser.add_argument("--due", help="Срок выполнения (YYYY-MM-DD)")
-    add_parser.add_argument("--tags", help="Теги через запятую, например a,b,c")
+    if title is None or amount is None or email is None:
+        raise ValueError("Нужно передать --title, --amount и --email")
 
-    remove_parser = subparsers.add_parser("remove", help="Удалить заказ по id")
-    remove_parser.add_argument("--id", required=True, help="Id заказа")
+    return {
+        "title": title,
+        "amount": amount,
+        "email": email,
+        "due": due,
+        "tags": tags,
+    }
 
-    edit_parser = subparsers.add_parser(
-        "edit", help="Изменить только переданные поля заказа"
-    )
-    edit_parser.add_argument("--id", required=True, help="Id заказа")
-    edit_parser.add_argument("--title", help="Новое название заказа")
-    edit_parser.add_argument("--amount", type=float, help="Новая сумма заказа")
-    edit_parser.add_argument("--email", help="Новый email клиента")
-    edit_parser.add_argument("--due", help="Новый срок выполнения (YYYY-MM-DD)")
 
-    tags_parser = subparsers.add_parser("tags", help="Управление тегами заказа")
-    tags_parser.add_argument("--id", required=True, help="Id заказа")
-    tags_parser.add_argument("--add", help="Теги для добавления через запятую")
-    tags_parser.add_argument("--remove", help="Теги для удаления через запятую")
+def parse_remove(args: list[str]) -> dict[str, object]:
+    """ Разобрать аргументы команды remove """
+    order_id = None
 
-    status_parser = subparsers.add_parser("status", help="Изменить статус заказа")
-    status_parser.add_argument("--id", required=True, help="Id заказа")
-    status_parser.add_argument("status", choices=_STATUSES, help="Новый статус")
+    i = 0
+    while i < len(args):
+        arg = args[i]
+        if arg == "--id":
+            order_id = args[i + 1]
+            i += 2
+        else:
+            raise ValueError(f"Неизвестный аргумент: {arg}")
 
-    return parser
+    if order_id is None:
+        raise ValueError("Нужно передать --id")
+
+    return {"id": order_id}
+
+
+def parse_edit(args: list[str]) -> dict[str, object]:
+    """ Разобрать аргументы команды edit """
+    order_id = None
+    title = None
+    amount = None
+    email = None
+    due = None
+
+    i = 0
+    while i < len(args):
+        arg = args[i]
+        if arg == "--id":
+            order_id = args[i + 1]
+            i += 2
+        elif arg == "--title":
+            title = args[i + 1]
+            i += 2
+        elif arg == "--amount":
+            amount = float(args[i + 1])
+            i += 2
+        elif arg == "--email":
+            email = args[i + 1]
+            i += 2
+        elif arg == "--due":
+            due = args[i + 1]
+            i += 2
+        else:
+            raise ValueError(f"Неизвестный аргумент: {arg}")
+
+    if order_id is None:
+        raise ValueError("Нужно передать --id")
+
+    return {
+        "id": order_id,
+        "title": title,
+        "amount": amount,
+        "email": email,
+        "due": due,
+    }
+
+
+def parse_tags_command(args: list[str]) -> dict[str, object]:
+    """ Разобрать аргументы команды tags """
+    order_id = None
+    add = None
+    remove = None
+
+    i = 0
+    while i < len(args):
+        arg = args[i]
+        if arg == "--id":
+            order_id = args[i + 1]
+            i += 2
+        elif arg == "--add":
+            add = args[i + 1]
+            i += 2
+        elif arg == "--remove":
+            remove = args[i + 1]
+            i += 2
+        else:
+            raise ValueError(f"Неизвестный аргумент: {arg}")
+
+    if order_id is None:
+        raise ValueError("Нужно передать --id")
+
+    return {"id": order_id, "add": add, "remove": remove}
+
+
+def parse_status(args: list[str]) -> dict[str, object]:
+    """ Разобрать аргументы команды status """
+    order_id = None
+    status = None
+
+    i = 0
+    while i < len(args):
+        arg = args[i]
+        if arg == "--id":
+            order_id = args[i + 1]
+            i += 2
+        elif not arg.startswith("--"):
+            status = arg
+            i += 1
+        else:
+            raise ValueError(f"Неизвестный аргумент: {arg}")
+
+    if order_id is None or status is None:
+        raise ValueError("Использование: status --id <id> <новый статус>")
+
+    return {"id": order_id, "status": status}
