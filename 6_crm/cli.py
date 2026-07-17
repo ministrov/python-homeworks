@@ -1,7 +1,7 @@
 """ Модуль парсинга аргументов / команд """
 
 
-def parse_list(args: list[str]) -> dict[str, object]:
+def parse_list(args: list[str]) -> tuple[bool, str | None, int | None]:
     """ Разобрать аргументы команды list """
     overdue = False
     tag = None
@@ -22,10 +22,12 @@ def parse_list(args: list[str]) -> dict[str, object]:
         else:
             raise ValueError(f"Неизвестный аргумент: {arg}")
 
-    return {"overdue": overdue, "tag": tag, "limit": limit}
+    return overdue, tag, limit
 
 
-def parse_add(args: list[str]) -> dict[str, object]:
+def parse_add(
+    args: list[str],
+) -> tuple[str, float, str, str | None, str | None]:
     """ Разобрать аргументы команды add """
     title = None
     amount = None
@@ -57,16 +59,10 @@ def parse_add(args: list[str]) -> dict[str, object]:
     if title is None or amount is None or email is None:
         raise ValueError("Нужно передать --title, --amount и --email")
 
-    return {
-        "title": title,
-        "amount": amount,
-        "email": email,
-        "due": due,
-        "tags": tags,
-    }
+    return title, amount, email, due, tags
 
 
-def parse_remove(args: list[str]) -> dict[str, object]:
+def parse_remove(args: list[str]) -> str:
     """ Разобрать аргументы команды remove """
     order_id = None
 
@@ -82,10 +78,12 @@ def parse_remove(args: list[str]) -> dict[str, object]:
     if order_id is None:
         raise ValueError("Нужно передать --id")
 
-    return {"id": order_id}
+    return order_id
 
 
-def parse_edit(args: list[str]) -> dict[str, object]:
+def parse_edit(
+    args: list[str],
+) -> tuple[str, str | None, float | None, str | None, str | None]:
     """ Разобрать аргументы команды edit """
     order_id = None
     title = None
@@ -117,16 +115,12 @@ def parse_edit(args: list[str]) -> dict[str, object]:
     if order_id is None:
         raise ValueError("Нужно передать --id")
 
-    return {
-        "id": order_id,
-        "title": title,
-        "amount": amount,
-        "email": email,
-        "due": due,
-    }
+    return order_id, title, amount, email, due
 
 
-def parse_tags_command(args: list[str]) -> dict[str, object]:
+def parse_tags_command(
+    args: list[str],
+) -> tuple[str, str | None, str | None]:
     """ Разобрать аргументы команды tags """
     order_id = None
     add = None
@@ -150,10 +144,10 @@ def parse_tags_command(args: list[str]) -> dict[str, object]:
     if order_id is None:
         raise ValueError("Нужно передать --id")
 
-    return {"id": order_id, "add": add, "remove": remove}
+    return order_id, add, remove
 
 
-def parse_status(args: list[str]) -> dict[str, object]:
+def parse_status(args: list[str]) -> tuple[str, str]:
     """ Разобрать аргументы команды status """
     order_id = None
     status = None
@@ -173,4 +167,4 @@ def parse_status(args: list[str]) -> dict[str, object]:
     if order_id is None or status is None:
         raise ValueError("Использование: status --id <id> <новый статус>")
 
-    return {"id": order_id, "status": status}
+    return order_id, status
