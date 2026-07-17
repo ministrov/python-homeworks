@@ -1,13 +1,11 @@
 """ Модуль точки входа приложения crm системы """
 
 import sys
-from typing import cast
 
+import cli
 import storage
-from cli import build_parser
 from orders import (
     Order,
-    OrderStatus,
     add_tags,
     create_order,
     edit_order,
@@ -19,113 +17,153 @@ from orders import (
     remove_tags,
     set_status,
 )
-from utils.validators import parse_tags, validate_amount, validate_email
+from utils.validators import (
+    parse_tags,
+    validate_amount,
+    validate_email,
+    validate_status,
+)
 
 STORAGE_PATH = "orders.json"
 
 
-def _stringify_orders(orders: list[Order]) -> str:
-    """ Собрать заказы в текстовую таблицу """
-    headers = ["ID", "TITLE", "AMOUNT", "STATUS", "DUE"]
-    rows: list[list[str]] = [
-        [
-            order["id"],
-            order["title"],
-            f"{order['amount']:.2f}",
-            order["status"],
-            order["due"] or "-",
-        ]
-        for order in orders
-    ]
+def print_orders(orders: list[Order]) -> None:
+    """ Напечатать заказы в виде таблицы """
+    if not orders:
+        print("Заказов нет")
+        return
 
-    col_widths = [len(h) for h in headers]
-    for row in rows:
-        for i, col in enumerate(row):
-            col_widths[i] = max(col_widths[i], len(col))
-
-    def format_row(row: list[str]) -> str:
-        return " | ".join(f"{col:<{col_widths[i]}}" for i, col in enumerate(row))
-
-    lines = [format_row(headers), "-+-".join("-" * w for w in col_widths)]
-    lines.extend(format_row(row) for row in rows)
-    return "\n".join(lines)
+    print(f"{'ID':<38}{'TITLE':<25}{'AMOUNT':<12}{'STATUS':<14}{'DUE':<12}")
+    for order in orders:
+        due = order["due"]
+        if due is None:
+            due = "-"
+        print(
+            f"{order['id']:<38}{order['title']:<25}"
+            f"{order['amount']:<12.2f}{order['status']:<14}{due:<12}"
+        )
 
 
-def run(argv: list[str] | None = None) -> None:
-    """ Разобрать аргументы и выполнить соответствующую команду """
-    args = build_parser().parse_args(argv)
+def run_list(orders: list[Order], args: list[str]) -> None:
+    """ Выполнить команду list """
+    overdue, tag, limit = cli.parse_list(args)
+
+    result = list_orders(orders)
+    if overdue:
+        result = filter_overdue(result)
+    if tag is not None:
+        result = filter_by_tag(result, tag)
+    if limit is not None:
+        result = result[:limit]
+
+    print_orders(result)
+
+
+def run_add(orders: list[Order], args: list[str]) -> None:
+    """ Выполнить команду add """
+    title, amount, email, due, tags_string = cli.parse_add(args)
+    validate_email(email)
+    validate_amount(amount)
+
+    tags: set[str] = set()
+    if tags_string is not None:
+        tags = parse_tags(tags_string)
+
+    order = new_order(title, amount, email, due, tags)
+    create_order(orders, order)
+    storage.save(orders, STORAGE_PATH)
+    print(f"Заказ создан: {order['id']}")
+
+
+def run_remove(orders: list[Order], args: list[str]) -> None:
+    """ Выполнить команду remove """
+    order_id = cli.parse_remove(args)
+    removed = remove_order(orders, order_id)
+    storage.save(orders, STORAGE_PATH)
+    print(f"Заказ удалён: {removed['id']}")
+
+
+def run_edit(orders: list[Order], args: list[str]) -> None:
+    """ Выполнить команду edit """
+    order_id, title, amount, email, due = cli.parse_edit(args)
+
+    updates: dict[str, object] = {}
+    if title is not None:
+        updates["title"] = title
+    if amount is not None:
+        validate_amount(amount)
+        updates["amount"] = amount
+    if email is not None:
+        validate_email(email)
+        updates["email"] = email
+    if due is not None:
+        updates["due"] = due
+
+    if not updates:
+        print("Не переданы поля для редактирования")
+        sys.exit(1)
+
+    edit_order(orders, order_id, updates)
+    storage.save(orders, STORAGE_PATH)
+    print(f"Заказ изменён: {order_id}")
+
+
+def run_tags(orders: list[Order], args: list[str]) -> None:
+    """ Выполнить команду tags """
+    order_id, add, remove = cli.parse_tags_command(args)
+
+    if add is None and remove is None:
+        print("Нужно передать --add и/или --remove")
+        sys.exit(1)
+
+    if add is not None:
+        add_tags(orders, order_id, parse_tags(add))
+    if remove is not None:
+        remove_tags(orders, order_id, parse_tags(remove))
+
+    storage.save(orders, STORAGE_PATH)
+    print(f"Теги заказа обновлены: {order_id}")
+
+
+def run_status(orders: list[Order], args: list[str]) -> None:
+    """ Выполнить команду status """
+    order_id, status = cli.parse_status(args)
+    validate_status(status)
+    set_status(orders, order_id, status)  # type: ignore[arg-type]
+    storage.save(orders, STORAGE_PATH)
+    print(f"Статус заказа изменён: {order_id} -> {status}")
+
+
+def main() -> None:
+    """ Разобрать команду и выполнить её """
+    if len(sys.argv) < 2:
+        print("Использование: python __main__.py <команда> [аргументы]")
+        sys.exit(1)
+
+    command = sys.argv[1]
+    args = sys.argv[2:]
     orders = storage.load(STORAGE_PATH)
 
-    if args.command == "list":
-        result = list_orders(orders)
-        if args.overdue:
-            result = filter_overdue(result)
-        if args.tag:
-            result = filter_by_tag(result, args.tag)
-        if args.limit is not None:
-            result = result[: args.limit]
-        print(_stringify_orders(result) if result else "Заказов нет")
-        return
-
-    if args.command == "add":
-        validate_email(args.email)
-        validate_amount(args.amount)
-        tags: set[str] = parse_tags(args.tags) if args.tags else set()
-        order = new_order(args.title, args.amount, args.email, args.due, tags)
-        create_order(orders, order)
-        storage.save(orders, STORAGE_PATH)
-        print(f"Заказ создан: {order['id']}")
-        return
-
-    if args.command == "remove":
-        removed = remove_order(orders, args.id)
-        storage.save(orders, STORAGE_PATH)
-        print(f"Заказ удалён: {removed['id']}")
-        return
-
-    if args.command == "edit":
-        updates: dict[str, object] = {}
-        if args.title is not None:
-            updates["title"] = args.title
-        if args.amount is not None:
-            validate_amount(args.amount)
-            updates["amount"] = args.amount
-        if args.email is not None:
-            validate_email(args.email)
-            updates["email"] = args.email
-        if args.due is not None:
-            updates["due"] = args.due
-        if not updates:
-            print("Не переданы поля для редактирования")
-            sys.exit(1)
-        edit_order(orders, args.id, updates)
-        storage.save(orders, STORAGE_PATH)
-        print(f"Заказ изменён: {args.id}")
-        return
-
-    if args.command == "tags":
-        if not args.add and not args.remove:
-            print("Нужно передать --add и/или --remove")
-            sys.exit(1)
-        if args.add:
-            add_tags(orders, args.id, parse_tags(args.add))
-        if args.remove:
-            remove_tags(orders, args.id, parse_tags(args.remove))
-        storage.save(orders, STORAGE_PATH)
-        print(f"Теги заказа обновлены: {args.id}")
-        return
-
-    if args.command == "status":
-        status = cast(OrderStatus, args.status)
-        set_status(orders, args.id, status)
-        storage.save(orders, STORAGE_PATH)
-        print(f"Статус заказа изменён: {args.id} -> {status}")
-        return
+    if command == "list":
+        run_list(orders, args)
+    elif command == "add":
+        run_add(orders, args)
+    elif command == "remove":
+        run_remove(orders, args)
+    elif command == "edit":
+        run_edit(orders, args)
+    elif command == "tags":
+        run_tags(orders, args)
+    elif command == "status":
+        run_status(orders, args)
+    else:
+        print(f"Неизвестная команда: {command}")
+        sys.exit(1)
 
 
 if __name__ == "__main__":
     try:
-        run()
+        main()
     except (KeyError, ValueError) as e:
         print(f"Ошибка: {e}")
         sys.exit(1)
