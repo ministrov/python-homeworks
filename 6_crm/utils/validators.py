@@ -1,5 +1,7 @@
 """ Модуль проверки полей заказа """
 
+_STATUSES = ("new", "in_progress", "done", "cancelled")
+
 
 def validate_email(email: str) -> None:
     """ Проверить формат email """
@@ -20,6 +22,13 @@ def validate_amount(amount: float) -> None:
     """ Проверить, что сумма заказа положительна """
     if amount <= 0:
         raise ValueError(f"Сумма заказа должна быть положительной: {amount}")
+
+
+def validate_status(status: str) -> None:
+    """ Проверить, что статус входит в допустимый набор """
+    if status not in _STATUSES:
+        allowed = ", ".join(_STATUSES)
+        raise ValueError(f"Некорректный статус: {status}. Допустимые статусы: {allowed}")
 
 
 def parse_tags(raw: str) -> set[str]:
