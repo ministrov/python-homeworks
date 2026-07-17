@@ -1,14 +1,18 @@
 """ Модуль проверки полей заказа """
 
-import re
-
-
-_EMAIL_RE = re.compile(r"^[^@\s]+@[^@\s]+\.[^@\s]+$")
-
 
 def validate_email(email: str) -> None:
     """ Проверить формат email """
-    if not _EMAIL_RE.match(email):
+    if "@" not in email:
+        raise ValueError(f"Некорректный email: {email}")
+
+    parts = email.split("@")
+    if len(parts) != 2:
+        raise ValueError(f"Некорректный email: {email}")
+
+    name_part = parts[0]
+    domain_part = parts[1]
+    if not name_part or "." not in domain_part:
         raise ValueError(f"Некорректный email: {email}")
 
 
@@ -20,4 +24,10 @@ def validate_amount(amount: float) -> None:
 
 def parse_tags(raw: str) -> set[str]:
     """ Разобрать строку тегов через запятую в множество """
-    return {tag.strip() for tag in raw.split(",") if tag.strip()}
+    tags: set[str] = set()
+    parts = raw.split(",")
+    for part in parts:
+        tag = part.strip()
+        if tag:
+            tags.add(tag)
+    return tags
