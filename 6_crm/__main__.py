@@ -70,7 +70,7 @@ def run(argv: list[str] | None = None) -> None:
     if args.command == "add":
         validate_email(args.email)
         validate_amount(args.amount)
-        tags = parse_tags(args.tags) if args.tags else set()
+        tags: set[str] = parse_tags(args.tags) if args.tags else set()
         order = new_order(args.title, args.amount, args.email, args.due, tags)
         create_order(orders, order)
         storage.save(orders, STORAGE_PATH)
