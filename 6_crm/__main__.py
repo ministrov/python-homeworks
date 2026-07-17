@@ -17,6 +17,7 @@ from orders import (
     remove_tags,
     set_status,
 )
+from utils.table import print_orders
 from utils.validators import (
     parse_tags,
     validate_amount,
@@ -25,23 +26,6 @@ from utils.validators import (
 )
 
 STORAGE_PATH = "orders.json"
-
-
-def print_orders(orders: list[Order]) -> None:
-    """ Напечатать заказы в виде таблицы """
-    if not orders:
-        print("Заказов нет")
-        return
-
-    print(f"{'ID':<38}{'TITLE':<25}{'AMOUNT':<12}{'STATUS':<14}{'DUE':<12}")
-    for order in orders:
-        due = order["due"]
-        if due is None:
-            due = "-"
-        print(
-            f"{order['id']:<38}{order['title']:<25}"
-            f"{order['amount']:<12.2f}{order['status']:<14}{due:<12}"
-        )
 
 
 def run_list(orders: list[Order], args: list[str]) -> None:
