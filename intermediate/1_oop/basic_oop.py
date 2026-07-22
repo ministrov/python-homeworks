@@ -42,3 +42,8 @@ class BankAccount:
     def transfer_to(self, other_account: BankAccount, amount: int):
         self.withdraw(amount)
         other_account.deposit(amount)
+
+    def info(self) -> str:
+        return (f"Счёт №{self.account_number} "
+                f"(владелец: {self.account_holder}), "
+                f"баланс: {self.current_balance}")
