@@ -5,19 +5,22 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 ## What this repo is
 
 Personal Python homework/practice repository (split off from a separate main
-repo). Each top-level folder is a standalone exercise, numbered in the order
-it was completed — there is no shared package, build system, or test suite.
-Run any file directly:
+repo), split by course difficulty level into `basic/`, `intermediate/`, and
+`advanced/`. Within each level, top-level folders are standalone exercises,
+numbered in the order they were completed — there is no shared package,
+build system, or test suite. Run any file directly:
 
 ```
-python <folder>/<file>.py
-python <folder>/<file>.py <cli-args>   # 5_library expects sys.argv
+python <level>/<folder>/<file>.py
+python basic/5_library/library.py <cli-args>   # 5_library expects sys.argv
 ```
 
 Target interpreter is Python 3.14 (`python --version`). No dependency
 manager, requirements file, or virtualenv is checked in — stdlib only so far.
 
 ## Repository structure
+
+### `basic/`
 
 - `1_vars/` — variables, input/print basics.
 - `2_operations/` — numeric operations, lists/tuples (`expences.py`,
@@ -52,8 +55,8 @@ manager, requirements file, or virtualenv is checked in — stdlib only so far.
   - `__main__.py` — entry point: dispatches on `sys.argv[1]` to one
     `run_<command>` function per command (parse → validate → call the
     domain function → save → print). Run as
-    `python 6_crm/__main__.py <command> [flags]` (imports are
-    unqualified — run from inside `6_crm/`, not from repo root, until
+    `python __main__.py <command> [flags]` (imports are
+    unqualified — run from inside `basic/6_crm/`, not from repo root, until
     it's turned into a proper package).
 
   Commands: `list` (`--overdue`, `--tag`, `--limit`), `add` (`--title`,
@@ -72,8 +75,18 @@ manager, requirements file, or virtualenv is checked in — stdlib only so far.
   without reaching for `typing.cast`.
 
 Folders are additive history, not a curriculum tree to keep refactoring —
-earlier exercises (`1_vars` … `4_expenses`) are done and generally
-shouldn't be rewritten except to fix a real bug.
+earlier exercises (`basic/1_vars` … `basic/4_expenses`) are done and
+generally shouldn't be rewritten except to fix a real bug.
+
+### `intermediate/`
+
+- `1_oop/` — OOP exercises. `basic_oop.py` is currently an empty
+  placeholder — not yet started.
+
+### `advanced/`
+
+Empty so far (holds only `.gitkeep`); reserved for the advanced-level
+course track.
 
 ## Conventions observed in the code
 
