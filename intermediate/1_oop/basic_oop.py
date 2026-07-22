@@ -19,13 +19,13 @@
 
 
 class BankAccount:
-    def __init__(self, account_owener: str, account_number: str | int, current_balance: int = 0):
-        self.account_owener = account_owener
-        self.account_number = account_number
-        self.current_balance = current_balance
-
+    def __init__(self, account_holder: str, account_number: str | int, current_balance: int = 0):
         if current_balance < 0:
             raise ValueError("Баланс не может быть отрицательным")
+
+        self.account_holder = account_holder
+        self.account_number = account_number
+        self.current_balance = current_balance
 
     def deposit(self, amount: int):
         if amount <= 0:
@@ -35,8 +35,10 @@ class BankAccount:
     def withdraw(self, amount: int):
         if amount <= 0:
             raise ValueError("Нельзя снимать на отрицательную сумму")
-        if (self.current_balance - amount) < 0:
-            raise ValueError(
-                "Нельзя снимать до отрицательных значений текущего баланса")
-        result = self.current_balance - amount
-        self.current_balance = result
+        if self.current_balance - amount < 0:
+            raise ValueError("Недостаточно средств на счёте")
+        self.current_balance -= amount
+
+    def transfer_to(self, other_account: BankAccount, amount: int):
+        self.withdraw(amount)
+        other_account.deposit(amount)
