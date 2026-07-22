@@ -26,3 +26,8 @@ class BankAccount:
 
         if current_balance < 0:
             raise ValueError("Баланс не может быть отрицательным")
+
+    def deposit(self, amount: int):
+        if amount <= 0:
+            raise ValueError("Нельзя пополнять на отрицательную сумму")
+        self.current_balance += amount
