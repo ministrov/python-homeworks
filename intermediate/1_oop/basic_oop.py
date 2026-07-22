@@ -31,3 +31,12 @@ class BankAccount:
         if amount <= 0:
             raise ValueError("Нельзя пополнять на отрицательную сумму")
         self.current_balance += amount
+
+    def withdraw(self, amount: int):
+        if amount <= 0:
+            raise ValueError("Нельзя снимать на отрицательную сумму")
+        if (self.current_balance - amount) < 0:
+            raise ValueError(
+                "Нельзя снимать до отрицательных значений текущего баланса")
+        result = self.current_balance - amount
+        self.current_balance = result
