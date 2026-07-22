@@ -19,12 +19,10 @@
 
 
 class BankAccount:
-    balance: int = 0
-
-    def __init__(self, account_owener: str, account_number: str | int, current_balance: int = balance):
+    def __init__(self, account_owener: str, account_number: str | int, current_balance: int = 0):
         self.account_owener = account_owener
         self.account_number = account_number
         self.current_balance = current_balance
 
-        if self.current_balance < 0:
+        if current_balance < 0:
             raise ValueError("Баланс не может быть отрицательным")
