@@ -19,6 +19,9 @@
 
 
 class BankAccount:
+
+    _accounts_created: int = 0
+
     def __init__(self, account_holder: str, account_number: str | int, current_balance: int = 0):
         if current_balance < 0:
             raise ValueError("Баланс не может быть отрицательным")
@@ -26,6 +29,8 @@ class BankAccount:
         self.account_holder = account_holder
         self.account_number = account_number
         self.current_balance = current_balance
+
+        BankAccount._accounts_created += 1
 
     def deposit(self, amount: int):
         if amount <= 0:
@@ -47,3 +52,18 @@ class BankAccount:
         return (f"Счёт №{self.account_number} "
                 f"(владелец: {self.account_holder}), "
                 f"баланс: {self.current_balance}")
+
+    @classmethod
+    def get_accounts_created(cls) -> int:
+        return cls._accounts_created
+
+
+if __name__ == "__main__":
+    acc1 = BankAccount("Иван", "1001", 1000)
+    acc2 = BankAccount("Мария", "1002")
+
+    acc1.transfer_to(acc2, 300)
+
+    print(acc1.info())  # Счёт №1001 (владелец: Иван), баланс: 700
+    print(acc2.info())  # Счёт №1002 (владелец: Мария), баланс: 300
+    print(BankAccount.get_accounts_created())  # 2
