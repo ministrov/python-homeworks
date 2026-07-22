@@ -30,18 +30,46 @@ manager, requirements file, or virtualenv is checked in — stdlib only so far.
   implementing `filter`/`sort` over a `dict[str, str]` catalog. `PLAN.md` in
   that folder is a step-by-step design doc with a checklist — read it before
   changing `library.py` to see what's intentionally done vs. still open.
-- `6_crm/` — the most structured exercise so far, split into modules:
+- `6_crm/` — a finished CLI utility for managing orders, split into modules:
   - `orders.py` — domain model (`Order` as `TypedDict`, `OrderStatus` as
-    `Literal`) and pure functions (`create_order`, `list_orders`,
-    `edit_order`, `remove_order`) operating on `list[Order]`.
-  - `storage.py` — JSON persistence (`load`/`save`), currently stubbed
-    (`pass`) — not yet implemented.
-  - `cli.py` — command/argument parsing, currently just a stub docstring.
-  - `utils/validators.py` — id/field validation, currently just a stub
-    docstring.
-  - `__main__.py` — entry point wiring the pieces together; run as
-    `python 6_crm/__main__.py` (imports are unqualified — run from inside
-    `6_crm/`, not from repo root, until it's turned into a proper package).
+    `Literal`) and pure functions operating on `list[Order]`: `new_order`
+    (generates a uuid4 id), `create_order`, `list_orders`, `find_order`
+    (raises `KeyError` if missing), `edit_order` (only fields in
+    `_EDITABLE_FIELDS` allowed, `KeyError` otherwise), `remove_order`,
+    `add_tags`/`remove_tags`, `set_status` (also stamps `closed_at`),
+    `is_overdue`, `filter_by_tag`/`filter_overdue`.
+  - `storage.py` — JSON persistence (`load`/`save`); tags are stored as a
+    list on disk and converted to/from `set[str]` in memory.
+  - `cli.py` — one `parse_<command>` function per subcommand (`list`,
+    `add`, `remove`, `edit`, `tags`, `status`), each a manual `while`-loop
+    scan of the args list (no `argparse`) returning a plain tuple of
+    typed values.
+  - `utils/validators.py` — `validate_email`, `validate_amount`,
+    `validate_status`, `parse_tags`.
+  - `utils/table.py` — `print_orders`, the table-printing helper for
+    `list` output; kept separate from `validators.py` since that module
+    is scoped to validation only.
+  - `__main__.py` — entry point: dispatches on `sys.argv[1]` to one
+    `run_<command>` function per command (parse → validate → call the
+    domain function → save → print). Run as
+    `python 6_crm/__main__.py <command> [flags]` (imports are
+    unqualified — run from inside `6_crm/`, not from repo root, until
+    it's turned into a proper package).
+
+  Commands: `list` (`--overdue`, `--tag`, `--limit`), `add` (`--title`,
+  `--amount`, `--email`, `--due`, `--tags`), `remove` (`--id`), `edit`
+  (`--id` plus any of `--title`/`--amount`/`--email`/`--due`), `tags`
+  (`--id`, `--add`, `--remove`), `status` (`--id` plus a positional
+  status value).
+
+  Deliberately kept to plain loops, `if`/`elif`, and manual `sys.argv`
+  parsing instead of `argparse`, comprehensions, `cast()`, or set-operator
+  shortcuts (`|=`/`-=`) — the repo owner asked for code that reads as
+  intern/junior-level rather than idiomatic-but-denser Python. Preserve
+  that style in further `6_crm` edits unless told otherwise. One
+  `# type: ignore[arg-type]` remains in `__main__.py`'s `status` command,
+  bridging a runtime-validated `str` to the `OrderStatus` `Literal` type
+  without reaching for `typing.cast`.
 
 Folders are additive history, not a curriculum tree to keep refactoring —
 earlier exercises (`1_vars` … `4_expenses`) are done and generally
