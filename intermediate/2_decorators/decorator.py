@@ -63,14 +63,14 @@ def limit_args(max_value: int, mode: str) -> Callable[[Callable[P, R]], Callable
 # ---------- Проверка ----------
 if __name__ == "__main__":
     @limit_args(max_value=10, mode="clip")
-    def multiply(a, b):
+    def multiply(a: int, b: int) -> int:
         return a * b
 
     print(multiply(2, 3))     # 6
     print(multiply(100, 3))   # 30  (100 -> 10)
 
     @limit_args(max_value=10, mode="error")
-    def add(a, b):
+    def add(a: int, b: int) -> int:
         return a + b
 
     print(add(2, 3))          # 5
