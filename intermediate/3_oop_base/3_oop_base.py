@@ -76,6 +76,17 @@ class Hotel:
     def add_room(self, room: Room):
         self.rooms.append(room)
 
+    def show_booked_rooms(self):
+        actives = [
+            active for active in self.bookings if not active.is_cancelled]
+
+        for active in actives:
+            print(
+                f"номер гостя: {active.guest_name} "
+                f"дата въезда: {active.date_of_check_in} "
+                f"дата выезда: {active.date_of_check_out}"
+            )
+
 
 if __name__ == "__main__":
     room = Room("12", 12.40)
