@@ -115,8 +115,30 @@ class Hotel:
 
 
 if __name__ == "__main__":
+    hotel = Hotel("Гранд Отель")
+
     room = Room("12", 12.40)
     luxury_room = LuxuryRoom("23", 23, 1.5)
+    hotel.add_room(room)
+    hotel.add_room(luxury_room)
 
-    print(room.show_info())
-    print(luxury_room.show_info())
+    print(room.show_info())  # Номер комнаты: № 12 Цена за ночь: 12.4
+    print(luxury_room.show_info())  # Номер комнаты: № 23 Цена за ночь: 23 Увеличение цены на: 1.5
+
+    booking = hotel.book_room(room, "Иван", date(2026, 8, 1), date(2026, 8, 5))
+    available = [r.room_number for r in hotel.list_available_rooms(date(2026, 8, 1), date(2026, 8, 5))]
+    print(available)  # ['23']
+
+    try:
+        hotel.book_room(room, "Мария", date(2026, 8, 3), date(2026, 8, 10))
+    except ValueError as error:
+        print(error)  # Номер не доступен
+
+    print("--- забронированные номера ---")
+    hotel.show_booked_rooms()  # номер гостя: Иван дата въезда: 2026-08-01 дата выезда: 2026-08-05
+
+    hotel.cancel_booking(booking)
+    print("--- после отмены брони ---")
+    hotel.show_booked_rooms()  # (ничего не выводится, брони нет)
+    available = [r.room_number for r in hotel.list_available_rooms(date(2026, 8, 1), date(2026, 8, 5))]
+    print(available)  # ['12', '23']
