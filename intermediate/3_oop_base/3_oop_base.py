@@ -14,3 +14,22 @@
         забронировать и отменить бронирование
         показать забронированные номера
 """
+
+
+class Room:
+    """ Комната в отеле """
+
+    def __init__(self, room_number: str | int, price_per_night: int | float):
+        if price_per_night < 0:
+            raise ValueError("Цена за ночь не может быть отрицательной")
+        self.room_number = room_number
+        self.price_per_night = price_per_night
+
+    def get_price(self) -> int | float:
+        return self.price_per_night
+
+    def show_info(self) -> str:
+        return (
+            f"Номер комнаты: № {self.room_number} "
+            f"Цена за ночь: {self.price_per_night}"
+        )
