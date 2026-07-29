@@ -15,6 +15,8 @@
         показать забронированные номера
 """
 
+from datetime import date
+
 
 class Room:
     """ Комната в отеле """
@@ -49,6 +51,20 @@ class LuxuryRoom(Room):
             f"{base} "
             f"Увеличение цены на: {self.price_multiplier}"
         )
+
+
+class Booking:
+    def __init__(self, room: Room, guest_name: str, date_of_check_in: date, date_of_check_out: date, is_cancelled: bool = False):
+        if date_of_check_out <= date_of_check_in:
+            raise ValueError("Дата выезда не может быть раньше даты заезда!!!")
+        self.room = room
+        self.guest_name = guest_name
+        self.date_of_check_in = date_of_check_in
+        self.date_of_check_out = date_of_check_out
+        self.is_cancelled = is_cancelled
+
+    def cancel(self):
+        self.is_cancelled = True
 
 
 if __name__ == "__main__":
