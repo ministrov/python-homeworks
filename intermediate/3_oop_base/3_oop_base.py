@@ -110,6 +110,9 @@ class Hotel:
         self.bookings.append(booking)
         return booking
 
+    def cancel_booking(self, booking: Booking):
+        booking.cancel()
+
 
 if __name__ == "__main__":
     room = Room("12", 12.40)
