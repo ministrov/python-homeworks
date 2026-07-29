@@ -67,6 +67,16 @@ class Booking:
         self.is_cancelled = True
 
 
+class Hotel:
+    def __init__(self, hotel_name: str):
+        self.hotel_name = hotel_name
+        self.rooms: list[Room] = []
+        self.bookings: list[Booking] = []
+
+    def add_room(self, room: Room):
+        self.rooms.append(room)
+
+
 if __name__ == "__main__":
     room = Room("12", 12.40)
     luxury_room = LuxuryRoom("23", 23, 1.5)
