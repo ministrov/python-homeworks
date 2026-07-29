@@ -103,6 +103,13 @@ class Hotel:
                 return False
         return True
 
+    def book_room(self, room: Room, guest_name: str, date_from: date, date_to: date) -> Booking:
+        if not self._is_room_available(room, date_from, date_to):
+            raise ValueError("Номер не доступен")
+        booking = Booking(room, guest_name, date_from, date_to)
+        self.bookings.append(booking)
+        return booking
+
 
 if __name__ == "__main__":
     room = Room("12", 12.40)
