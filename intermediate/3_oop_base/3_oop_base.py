@@ -87,6 +87,22 @@ class Hotel:
                 f"дата выезда: {active.date_of_check_out}"
             )
 
+    def list_available_rooms(self, date_from: date, date_to: date) -> list[Room]:
+        return [
+            room for room in self.rooms
+            if self._is_room_available(room, date_from, date_to)
+        ]
+
+    def _is_room_available(self, room: Room, date_from: date, date_to: date) -> bool:
+        for booking in self.bookings:
+            if booking.is_cancelled:
+                continue
+            if booking.room is not room:
+                continue
+            if booking.date_of_check_in < date_to and booking.date_of_check_out > date_from:
+                return False
+        return True
+
 
 if __name__ == "__main__":
     room = Room("12", 12.40)
