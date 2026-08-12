@@ -94,3 +94,22 @@ class Monitoring:
             average = self.statistics.get_average_grade(grades)
             if average < self.threshold:
                 self.notifier.notify(student, average)
+
+
+if __name__ == "__main__":
+    ivan = Student("Иван", 1)
+    maria = Student("Мария", 2)
+
+    journal = Journal()
+    journal.add_grade(ivan, "Математика", 2.0)
+    journal.add_grade(ivan, "Русский язык", 3.0)
+    journal.add_grade(ivan, "Физика", 3.0)
+    journal.add_grade(maria, "Математика", 5.0)
+    journal.add_grade(maria, "Русский язык", 4.0)
+    journal.add_grade(maria, "Физика", 5.0)
+
+    monitoring = Monitoring(MeanStatistics(), ConsoleNotifier(), journal)
+    monitoring.check_all_students()
+    # Студент: Иван
+    # Средний балл: 2.6666666666666665
+    # (для Марии уведомления не будет — средний балл выше порога 3.5)
