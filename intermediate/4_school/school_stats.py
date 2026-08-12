@@ -9,3 +9,121 @@
         Возможность добавлять новые типы уведомлений и алгоритмы статистики без изменения существующего кода.
         Высокоуровневые сервисы зависят от абстракций, а не от конкретных классов.
 """
+
+from dataclasses import dataclass, field
+from abc import ABC, abstractmethod
+
+
+@dataclass
+class Student:
+    name: str
+    student_id: int
+
+
+@dataclass
+class Grade:
+    student: Student
+    subject: str
+    value_grade: float
+
+
+class Statistics(ABC):
+    @abstractmethod
+    def get_average_grade(self, grades: list[float]) -> float: ...
+
+
+class MeanStatistics(Statistics):
+    def get_average_grade(self, grades: list[float]) -> float:
+        return sum(grades) / len(grades)
+
+
+class MedianStatistics(Statistics):
+    def get_average_grade(self, grades: list[float]) -> float:
+        sorted_grades = sorted(grades)
+        n = len(sorted_grades)
+        mid = n // 2
+        if n % 2 == 0:
+            return (sorted_grades[mid - 1] + sorted_grades[mid]) / 2
+        return sorted_grades[mid]
+
+
+class Notifier(ABC):
+    @abstractmethod
+    def notify(self, student: Student, average: float) -> None: ...
+
+
+class ExclamationNotifier(Notifier):
+    def notify(self, student: Student, average: float) -> None:
+        print(f"!!! {student.name}: средний балл {average} ниже порога !!!")
+
+
+class ConsoleNotifier(Notifier):
+    def notify(self, student: Student, average: float) -> None:
+        print(f"Студент: {student.name}")
+        print(f"Средний балл: {average}")
+
+
+@dataclass
+class Journal:
+    list_of_grades: list[Grade] = field(default_factory=list[Grade])
+
+    def add_grade(self, student: Student, subject: str, value: float) -> None:
+        grade = Grade(student, subject, value)
+        self.list_of_grades.append(grade)
+
+    def get_grades_by_student(self, student: Student) -> list[float]:
+        result: list[float] = []
+
+        for grade in self.list_of_grades:
+            if grade.student == student:
+                result.append(grade.value_grade)
+        return result
+
+    def get_subject_all_grades(self, subject: str) -> list[float]:
+        result: list[float] = []
+
+        for grade in self.list_of_grades:
+            if grade.subject == subject:
+                result.append(grade.value_grade)
+        return result
+
+    def get_students_list(self) -> list[Student]:
+        result: list[Student] = []
+
+        for grade in self.list_of_grades:
+            if grade.student not in result:
+                result.append(grade.student)
+        return result
+
+
+@dataclass
+class Monitoring:
+    statistics: Statistics
+    notifier: Notifier
+    journal: Journal
+    threshold: float = 3.5
+
+    def check_all_students(self) -> None:
+        for student in self.journal.get_students_list():
+            grades = self.journal.get_grades_by_student(student)
+            average = self.statistics.get_average_grade(grades)
+            if average < self.threshold:
+                self.notifier.notify(student, average)
+
+
+if __name__ == "__main__":
+    ivan = Student("Иван", 1)
+    maria = Student("Мария", 2)
+
+    journal = Journal()
+    journal.add_grade(ivan, "Математика", 2.0)
+    journal.add_grade(ivan, "Русский язык", 3.0)
+    journal.add_grade(ivan, "Физика", 3.0)
+    journal.add_grade(maria, "Математика", 5.0)
+    journal.add_grade(maria, "Русский язык", 4.0)
+    journal.add_grade(maria, "Физика", 5.0)
+
+    monitoring = Monitoring(MeanStatistics(), ExclamationNotifier(), journal)
+    monitoring.check_all_students()
+    # !!! Иван: средний балл 2.6666666666666665 ниже порога !!!
+    # (для Марии уведомления не будет — средний балл выше порога 3.5)
