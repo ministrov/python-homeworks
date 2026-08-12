@@ -11,6 +11,7 @@
 """
 
 from dataclasses import dataclass, field
+from abc import ABC, abstractmethod
 
 
 @dataclass
@@ -24,6 +25,16 @@ class Grade:
     student: Student
     subject: str
     value_grade: float
+
+
+class Statistics(ABC):
+    @abstractmethod
+    def get_average_grade(self, grades: list[float]) -> float: ...
+
+
+class MeanStatistics(Statistics):
+    def get_average_grade(self, grades: list[float]) -> float:
+        return sum(grades) / len(grades)
 
 
 @dataclass
