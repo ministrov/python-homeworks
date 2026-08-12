@@ -9,3 +9,18 @@
         Возможность добавлять новые типы уведомлений и алгоритмы статистики без изменения существующего кода.
         Высокоуровневые сервисы зависят от абстракций, а не от конкретных классов.
 """
+
+from dataclasses import dataclass
+
+
+@dataclass
+class Student:
+    name: str
+    student_id: int
+
+
+@dataclass
+class Grade:
+    student: Student
+    subject: str
+    value_grade: float
