@@ -37,9 +37,24 @@ class MeanStatistics(Statistics):
         return sum(grades) / len(grades)
 
 
+class MedianStatistics(Statistics):
+    def get_average_grade(self, grades: list[float]) -> float:
+        sorted_grades = sorted(grades)
+        n = len(sorted_grades)
+        mid = n // 2
+        if n % 2 == 0:
+            return (sorted_grades[mid - 1] + sorted_grades[mid]) / 2
+        return sorted_grades[mid]
+
+
 class Notifier(ABC):
     @abstractmethod
     def notify(self, student: Student, average: float) -> None: ...
+
+
+class ExclamationNotifier(Notifier):
+    def notify(self, student: Student, average: float) -> None:
+        print(f"!!! {student.name}: средний балл {average} ниже порога !!!")
 
 
 class ConsoleNotifier(Notifier):
