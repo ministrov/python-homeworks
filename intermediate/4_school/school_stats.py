@@ -79,3 +79,18 @@ class Journal:
             if grade.student not in result:
                 result.append(grade.student)
         return result
+
+
+@dataclass
+class Monitoring:
+    statistics: Statistics
+    notifier: Notifier
+    journal: Journal
+    threshold: float = 3.5
+
+    def check_all_students(self) -> None:
+        for student in self.journal.get_students_list():
+            grades = self.journal.get_grades_by_student(student)
+            average = self.statistics.get_average_grade(grades)
+            if average < self.threshold:
+                self.notifier.notify(student, average)
