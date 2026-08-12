@@ -37,6 +37,17 @@ class MeanStatistics(Statistics):
         return sum(grades) / len(grades)
 
 
+class Notifier(ABC):
+    @abstractmethod
+    def notify(self, student: Student, average: float) -> None: ...
+
+
+class ConsoleNotifier(Notifier):
+    def notify(self, student: Student, average: float) -> None:
+        print(f"Студент: {student.name}")
+        print(f"Средний балл: {average}")
+
+
 @dataclass
 class Journal:
     list_of_grades: list[Grade] = field(default_factory=list[Grade])
