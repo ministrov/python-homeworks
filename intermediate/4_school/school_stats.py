@@ -123,8 +123,7 @@ if __name__ == "__main__":
     journal.add_grade(maria, "Русский язык", 4.0)
     journal.add_grade(maria, "Физика", 5.0)
 
-    monitoring = Monitoring(MeanStatistics(), ConsoleNotifier(), journal)
+    monitoring = Monitoring(MeanStatistics(), ExclamationNotifier(), journal)
     monitoring.check_all_students()
-    # Студент: Иван
-    # Средний балл: 2.6666666666666665
+    # !!! Иван: средний балл 2.6666666666666665 ниже порога !!!
     # (для Марии уведомления не будет — средний балл выше порога 3.5)
