@@ -22,6 +22,8 @@ class User:
 class SlotUser:
     """ Обычный пользователь без (__dict__) """
 
+    __slots__ = ("name", "email", "password")
+
     def __init__(self, name: str, email: str, password: str) -> None:
         self.name = name
         self.email = email
